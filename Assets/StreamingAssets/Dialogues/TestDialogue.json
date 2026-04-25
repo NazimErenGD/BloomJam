@@ -1,0 +1,31 @@
+[
+    {
+      "Id": "bob_greet",
+      "isOneTimeOnly": false,
+      "Lines": [
+        { "Speaker": "Bob", "Text": "Oh, hello there!" },
+        { "Speaker": "Bob", "Text": "Got a moment?" }
+      ],
+      "Choices": [
+        { "Text": "Sure", "ButtonColor": "green", "NextDialogueId": "bob_chat" },
+        { "Text": "Not now", "ButtonColor": "red", "NextDialogueId": null }
+      ],
+      "SetFlags": [ "MetNpc1" ]
+    },
+    {
+      "Id": "bob_chat",
+      "Lines": [
+        { "Speaker": "Bob", "Text": "Great, let's talk about flowers." }
+      ],
+      "Choices": []
+    },
+    {
+      "Id": "bob_already_met",
+      "Conditions": [
+        { "Type": "HasFlag", "FlagString": "MetNpc1" }
+      ],
+      "Lines": [
+        { "Speaker": "Bob", "Text": "Back again?" }
+      ]
+    }
+  ]

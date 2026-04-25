@@ -14,20 +14,34 @@ public class PlayerInputHandler : MonoBehaviour
     [Tooltip("Drag the Asset meant for Sprinting here")]
     public InputSignalSO SprintSignal;
     [Header("Camera Input")]
-    [HideInInspector]public Vector2 LookInput { get; private set; }
-    
-    [HideInInspector]public Vector2 MovementInput { get; private set; }
+    [HideInInspector] public Vector2 LookInput { get; private set; }
+
+    [HideInInspector] public Vector2 MovementInput { get; private set; }
 
     // THE EVENT BUS: Any machine can listen to this.
     public event Action<InputSignalSO> OnInputEvent;
     public event Action<InputSignalSO> OnSprintEvent;
     public event Action<InputSignalSO> OnSprintCanceledEvent;
+
     private PlayerControls _controls;
     private InputAction _moveAction;
     private InputAction _sprintAction;
     private InputAction _jumpAction;
     private InputAction _interactionAction;
     private InputAction _lookAction;
+
+    private void Awake()
+    {
+        MovementInput = Vector2.zero;
+        LookInput = Vector2.zero;
+
+        _controls = new PlayerControls();
+        _moveAction = _controls.Movement.MoveSignal;
+        _sprintAction = _controls.Movement.LeftShiftSignal;
+        _jumpAction = _controls.Movement.SpaceSignal;
+        _interactionAction = _controls.Movement.KeyboardESignal;
+        _lookAction = _controls.Camera.LookDelta;
+    }
 
     private void OnEnable()
     {
@@ -36,25 +50,6 @@ public class PlayerInputHandler : MonoBehaviour
         _jumpAction.Enable();
         _interactionAction.Enable();
         _lookAction.Enable();
-        _moveAction.canceled += OnMove;
-        _sprintAction.performed += OnSprint;
-        _sprintAction.canceled += OnSprintCanceled;
-        _jumpAction.performed += OnJump;
-        _interactionAction.performed += OnInteraction;
-        _lookAction.performed += OnLook;
-        _lookAction.canceled += OnLookCanceled;
-    }
-
-    private void Awake()
-    {
-        MovementInput = Vector2.zero;
-        LookInput = Vector2.zero;
-        _controls = new PlayerControls();
-        _moveAction = _controls.Movement.MoveSignal;
-        _sprintAction = _controls.Movement.LeftShiftSignal;
-        _jumpAction = _controls.Movement.SpaceSignal;
-        _interactionAction = _controls.Movement.KeyboardESignal;
-        _lookAction = _controls.Camera.LookDelta;
 
         _moveAction.performed += OnMove;
         _moveAction.canceled += OnMove;
@@ -68,11 +63,7 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void OnDisable()
     {
-        _lookAction.Disable();
-        _moveAction.Disable();
-        _sprintAction.Disable();
-        _jumpAction.Disable();
-        _interactionAction.Disable();
+        _moveAction.performed -= OnMove;
         _moveAction.canceled -= OnMove;
         _sprintAction.performed -= OnSprint;
         _sprintAction.canceled -= OnSprintCanceled;
@@ -80,6 +71,17 @@ public class PlayerInputHandler : MonoBehaviour
         _interactionAction.performed -= OnInteraction;
         _lookAction.performed -= OnLook;
         _lookAction.canceled -= OnLookCanceled;
+
+        _moveAction.Disable();
+        _sprintAction.Disable();
+        _jumpAction.Disable();
+        _interactionAction.Disable();
+        _lookAction.Disable();
+    }
+
+    private void OnDestroy()
+    {
+        _controls?.Dispose();
     }
 
     public void OnMove(InputAction.CallbackContext ctx)
@@ -92,16 +94,17 @@ public class PlayerInputHandler : MonoBehaviour
         }
         MovementInput = newInput;
     }
+
     public void OnLook(InputAction.CallbackContext ctx)
     {
         LookInput = ctx.ReadValue<Vector2>();
-        //Debug.Log("LookInput: " + LookInput);
     }
+
     public void OnLookCanceled(InputAction.CallbackContext ctx)
     {
         LookInput = Vector2.zero;
-        //Debug.Log("LookInput: " + LookInput);
     }
+
     public void OnSprint(InputAction.CallbackContext ctx)
     {
         if (ctx.performed)
@@ -109,6 +112,7 @@ public class PlayerInputHandler : MonoBehaviour
             OnSprintEvent?.Invoke(SprintSignal);
         }
     }
+
     public void OnSprintCanceled(InputAction.CallbackContext ctx)
     {
         if (ctx.canceled)
@@ -120,10 +124,8 @@ public class PlayerInputHandler : MonoBehaviour
     // Link this to your "Jump" Action in the PlayerInput component
     public void OnJump(InputAction.CallbackContext ctx)
     {
-        Debug.Log("OnJump");
         if (ctx.performed)
         {
-            // Broadcasts: "The Jump Signal just happened!"
             OnInputEvent?.Invoke(JumpSignal);
         }
     }
@@ -131,7 +133,6 @@ public class PlayerInputHandler : MonoBehaviour
     // Link this to your "Fire" Action
     public void OnInteraction(InputAction.CallbackContext ctx)
     {
-        Debug.Log("OnInteraction");
         if (ctx.performed)
         {
             OnInputEvent?.Invoke(InteractionSignal);

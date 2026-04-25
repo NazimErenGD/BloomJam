@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // Single point of entry for starting and running a dialogue.
 // Place one DialogueStarter in the scene, wire its DialogueUI ref,
@@ -11,6 +12,18 @@ public class DialogueStarter : MonoBehaviour
 
     [SerializeField] private DialogueUI ui;
 
+    [Header("Gameplay Suspension")]
+    [Tooltip("Player whose state machines + camera should pause while a dialogue is open.")]
+    [SerializeField] private Player player;
+    [Tooltip("Optional: explicit FirstPersonCamera reference. If left empty, DialogueStarter falls back to Player.CameraController, then a scene search.")]
+    [SerializeField] private FirstPersonCamera cameraOverride;
+    [Tooltip("Optionally also disable the input handler so movement/jump/sprint actions don't accumulate while in dialogue.")]
+    [SerializeField] private bool suspendInputHandler = false;
+    [Tooltip("If true, zeroes the player's Rigidbody velocity when suspending so they don't slide.")]
+    [SerializeField] private bool zeroVelocityOnSuspend = true;
+
+    private FirstPersonCamera _resolvedCamera;
+
     public event Action OnDialogueStarted;
     public event Action OnDialogueEnded;
 
@@ -18,6 +31,9 @@ public class DialogueStarter : MonoBehaviour
     private DialogueEntry _currentEntry;
     private int _currentLineIndex;
     private bool _isRunning;
+
+    private CursorLockMode _savedCursorLockMode;
+    private bool _savedCursorVisible;
 
     public bool IsRunning => _isRunning;
 
@@ -60,10 +76,22 @@ public class DialogueStarter : MonoBehaviour
         }
 
         _isRunning = true;
+        SetGameplaySuspended(true);
         if (ui != null) ui.Show();
         OnDialogueStarted?.Invoke();
 
         EnterEntry(entry);
+    }
+
+    private void Update()
+    {
+        if (!_isRunning) return;
+
+        var keyboard = Keyboard.current;
+        if (keyboard != null && keyboard.vKey.wasPressedThisFrame)
+        {
+            if (ui != null) ui.TryAdvance();
+        }
     }
 
     private void EnterEntry(DialogueEntry entry)
@@ -161,7 +189,67 @@ public class DialogueStarter : MonoBehaviour
         _currentEntry = null;
         _currentLineIndex = 0;
         if (ui != null) ui.Hide();
+        SetGameplaySuspended(false);
         OnDialogueEnded?.Invoke();
+    }
+
+    private void SetGameplaySuspended(bool suspended)
+    {
+        var cam = ResolveCamera();
+
+        if (suspended)
+        {
+            _savedCursorLockMode = Cursor.lockState;
+            _savedCursorVisible = Cursor.visible;
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            if (cam != null) cam.enabled = false;
+
+            if (player != null)
+            {
+                if (player.MovementMachine != null) player.MovementMachine.enabled = false;
+                if (player.ActionMachine != null) player.ActionMachine.enabled = false;
+                if (suspendInputHandler && player.InputHandler != null) player.InputHandler.enabled = false;
+
+                if (zeroVelocityOnSuspend && player.Rb != null)
+                {
+                    player.Rb.linearVelocity = Vector3.zero;
+                    player.Rb.angularVelocity = Vector3.zero;
+                }
+            }
+
+            if (cam == null)
+            {
+                Debug.LogWarning("DialogueStarter: no FirstPersonCamera could be resolved. Camera will keep responding to mouse. Assign 'Camera Override' or 'Player.CameraController'.", this);
+            }
+        }
+        else
+        {
+            if (player != null)
+            {
+                if (player.MovementMachine != null) player.MovementMachine.enabled = true;
+                if (player.ActionMachine != null) player.ActionMachine.enabled = true;
+                if (suspendInputHandler && player.InputHandler != null) player.InputHandler.enabled = true;
+            }
+
+            if (cam != null) cam.enabled = true;
+
+            Cursor.lockState = _savedCursorLockMode;
+            Cursor.visible = _savedCursorVisible;
+        }
+    }
+
+    private FirstPersonCamera ResolveCamera()
+    {
+        if (_resolvedCamera != null) return _resolvedCamera;
+
+        if (cameraOverride != null) { _resolvedCamera = cameraOverride; return _resolvedCamera; }
+        if (player != null && player.CameraController != null) { _resolvedCamera = player.CameraController; return _resolvedCamera; }
+
+        _resolvedCamera = FindFirstObjectByType<FirstPersonCamera>();
+        return _resolvedCamera;
     }
 
     private static void ApplySetFlags(DialogueEntry entry)

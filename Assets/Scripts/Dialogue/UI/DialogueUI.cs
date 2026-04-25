@@ -15,12 +15,17 @@ public class DialogueUI : MonoBehaviour
     [Header("Line")]
     [SerializeField] private TMP_Text speakerLabel;
     [SerializeField] private TMP_Text lineText;
+    [SerializeField] private Image speakerIcon;
     [SerializeField] private Button continueButton;
 
     [Header("Choices")]
     [SerializeField] private Transform choicesContainer;
     [SerializeField] private Button choiceButtonPrefab;
     [SerializeField] private bool showInactiveChoices = false;
+
+    [Header("Hints")]
+    [Tooltip("Text written onto the continue button at startup. Leave blank to keep whatever the prefab has.")]
+    [SerializeField] private string continueButtonLabel = "Continue [V]";
 
     private readonly List<Button> _spawnedChoiceButtons = new();
     private Action _onContinue;
@@ -31,6 +36,12 @@ public class DialogueUI : MonoBehaviour
         if (continueButton != null)
         {
             continueButton.onClick.AddListener(HandleContinueClicked);
+
+            if (!string.IsNullOrEmpty(continueButtonLabel))
+            {
+                var label = continueButton.GetComponentInChildren<TMP_Text>();
+                if (label != null) label.text = continueButtonLabel;
+            }
         }
     }
 
@@ -56,7 +67,19 @@ public class DialogueUI : MonoBehaviour
     public void SetLine(string speaker, string text, Action onContinue)
     {
         if (speakerLabel != null) speakerLabel.text = speaker ?? string.Empty;
-        if (lineText != null) lineText.text = text ?? string.Empty;
+        if (lineText != null)
+        {
+            lineText.gameObject.SetActive(true);
+            lineText.text = text ?? string.Empty;
+        }
+
+        if (speakerIcon != null)
+        {
+            var sprite = NpcSpriteLoader.GetByName(speaker);
+            speakerIcon.sprite = sprite;
+            speakerIcon.enabled = sprite != null;
+        }
+
         _onContinue = onContinue;
 
         ClearChoices();
@@ -71,6 +94,7 @@ public class DialogueUI : MonoBehaviour
     {
         ClearChoices();
         if (continueButton != null) continueButton.gameObject.SetActive(false);
+        if (lineText != null) lineText.gameObject.SetActive(false);
 
         if (choicesContainer == null || choiceButtonPrefab == null || choices == null)
             return;
@@ -108,6 +132,15 @@ public class DialogueUI : MonoBehaviour
             }
         }
         _spawnedChoiceButtons.Clear();
+    }
+
+    // Public hook so DialogueStarter (or any other input source) can advance
+    // the line without a button click. Safe to call when no line is active.
+    public bool TryAdvance()
+    {
+        if (_onContinue == null) return false;
+        HandleContinueClicked();
+        return true;
     }
 
     private void HandleContinueClicked()

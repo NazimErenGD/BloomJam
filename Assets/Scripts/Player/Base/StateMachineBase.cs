@@ -56,6 +56,16 @@ public abstract class StateMachineBase : MonoBehaviour
 
 
 
+    protected virtual void OnEnable()
+    {
+        // Re-subscribe after a previous OnDisable (e.g. when DialogueStarter
+        // suspended the machines for a dialogue). On the very first OnEnable
+        // _player is still null because Initialize hasn't run yet, so we skip;
+        // Initialize will subscribe in that case.
+        if (_player != null && PlayerInputHandler != null)
+            PlayerInputHandler.OnInputEvent += OnInputReceived;
+    }
+
     protected virtual void OnDisable()
     {
         // UNSUBSCRIBE (Safety)

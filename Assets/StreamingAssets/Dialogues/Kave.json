@@ -1,7 +1,7 @@
 [
     {
       "Id": "bob_greet",
-      "isOneTimeOnly": false,
+      "isOneTimeOnly": true,
       "Lines": [
         { "Speaker": "Bob", "Text": "Oh, hello there!" },
         { "Speaker": "Bob", "Text": "Got a moment?" }
@@ -14,8 +14,16 @@
     },
     {
       "Id": "bob_chat",
+      "Conditions":
+      [
+        { "Type": "NotCondition", "Condition": { "Type": "HasFlag", "FlagString": "MetNpc1" } }
+      ],
       "Lines": [
         { "Speaker": "Bob", "Text": "Great, let's talk about flowers." }
+        
+      ],
+      "Actions":[
+        { "Key": "ProgressBar.Advance", "Arg": "0.20" }
       ],
       "Choices": []
     },

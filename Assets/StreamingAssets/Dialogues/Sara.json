@@ -1,0 +1,36 @@
+[
+  {
+    "Id": "sara_intro",
+    "Lines": [
+      { "Speaker": "You",  "Text": "Hey... you don't look so good. What happened?" },
+      { "Speaker": "Sara", "Text": "It's my birthday today, but no one remembered... I'm a little hurt." }
+    ],
+    "Choices": [
+      {
+        "Text": "Wait a second, I'll be right back.",
+        "ButtonColor": "green",
+        "NextDialogueId": "sara_gift",
+        "Actions": [ { "Key": "ProgressBar.Advance" } ]
+      },
+      {
+        "Text": "Oh, I thought it was something serious.",
+        "ButtonColor": "red",
+        "NextDialogueId": "sara_dismiss"
+      }
+    ],
+    "SetFlags": [ "MetNpc1" ]
+  },
+  {
+    "Id": "sara_gift",
+    "Lines": [
+      { "Speaker": "You",  "Text": "(brings a chocolate) Surprise! Happy birthday!" },
+      { "Speaker": "Sara", "Text": "Oh... I wasn't expecting this. Thank you so much <3" }
+    ]
+  },
+  {
+    "Id": "sara_dismiss",
+    "Lines": [
+      { "Speaker": "Sara", "Text": "...right. Never mind, then." }
+    ]
+  }
+]

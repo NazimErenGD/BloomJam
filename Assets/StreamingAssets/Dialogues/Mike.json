@@ -1,0 +1,36 @@
+[
+  {
+    "Id": "mike_intro",
+    "Lines": [
+      { "Speaker": "You",  "Text": "Your eyes are barely staying open... are you okay?" },
+      { "Speaker": "Mike", "Text": "I couldn't sleep at all last night. It is officially caffeine o'clock." }
+    ],
+    "Choices": [
+      {
+        "Text": "You came to the right person, hold on.",
+        "ButtonColor": "green",
+        "NextDialogueId": "mike_coffee",
+        "Actions": [ { "Key": "ProgressBar.Advance" } ]
+      },
+      {
+        "Text": "Are you too lazy to get yourself a coffee?",
+        "ButtonColor": "red",
+        "NextDialogueId": "mike_dismiss"
+      }
+    ],
+    "SetFlags": [ "MetNpc2" ]
+  },
+  {
+    "Id": "mike_coffee",
+    "Lines": [
+      { "Speaker": "You",  "Text": "(brings a coffee) Here you go. Exactly what you needed." },
+      { "Speaker": "Mike", "Text": "This just brought me back to life. Thank you :)" }
+    ]
+  },
+  {
+    "Id": "mike_dismiss",
+    "Lines": [
+      { "Speaker": "Mike", "Text": "...thanks for the encouragement, I guess." }
+    ]
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "Id": "lily_intro",
+    "Lines": [
+      { "Speaker": "You",  "Text": "Is something the matter over there?" },
+      { "Speaker": "Lily", "Text": "I can't reach that file... it's stuck way up there." }
+    ],
+    "Choices": [
+      {
+        "Text": "Don't worry, I've got it.",
+        "ButtonColor": "green",
+        "NextDialogueId": "lily_help",
+        "Actions": [ { "Key": "ProgressBar.Advance" } ]
+      },
+      {
+        "Text": "If I were as short as you, I'd be miserable.",
+        "ButtonColor": "red",
+        "NextDialogueId": "lily_dismiss"
+      }
+    ],
+    "SetFlags": [ "MetNpc3" ]
+  },
+  {
+    "Id": "lily_help",
+    "Lines": [
+      { "Speaker": "You",  "Text": "(grabs the file and hands it over) Here you go." },
+      { "Speaker": "Lily", "Text": "My whole day just got brighter. Thank you <3" }
+    ]
+  },
+  {
+    "Id": "lily_dismiss",
+    "Lines": [
+      { "Speaker": "Lily", "Text": "...wow. Thanks for nothing." }
+    ]
+  }
+]

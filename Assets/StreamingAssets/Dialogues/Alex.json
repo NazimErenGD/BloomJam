@@ -1,0 +1,35 @@
+[
+  {
+    "Id": "alex_intro",
+    "Lines": [
+      { "Speaker": "You",  "Text": "You seem distracted... is something wrong?" },
+      { "Speaker": "Alex", "Text": "Lately my life hasn't been going the way I want it to, and I just feel inadequate." }
+    ],
+    "Choices": [
+      {
+        "Text": "Everyone feels that way sometimes. Don't be so hard on yourself - I'm here whenever you need someone.",
+        "ButtonColor": "green",
+        "NextDialogueId": "alex_thanks",
+        "Actions": [ { "Key": "ProgressBar.Advance" } ]
+      },
+      {
+        "Text": "No one's life is perfect. You don't need to be so fragile about it.",
+        "ButtonColor": "red",
+        "NextDialogueId": "alex_dismiss"
+      }
+    ],
+    "SetFlags": [ "MetNpc4" ]
+  },
+  {
+    "Id": "alex_thanks",
+    "Lines": [
+      { "Speaker": "Alex", "Text": "Thank you. That's exactly what I needed to hear. I'm lucky to have a coworker like you :)" }
+    ]
+  },
+  {
+    "Id": "alex_dismiss",
+    "Lines": [
+      { "Speaker": "Alex", "Text": "...yeah. I'll keep that in mind." }
+    ]
+  }
+]

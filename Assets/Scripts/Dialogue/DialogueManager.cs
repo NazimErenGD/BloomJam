@@ -29,6 +29,16 @@ public class DialogueEntry
     public List<Choice> Choices { get; set; }
     // Flags to add to GameFlagsService when this entry plays.
     public List<string> SetFlags { get; set; }
+    // Named actions to fire via DialogueActions when this entry plays.
+    public List<DialogueAction> Actions { get; set; }
+}
+
+// Named callback fired through DialogueActions. Arg is optional and is
+// passed verbatim to the handler (handlers parse it themselves if needed).
+public class DialogueAction
+{
+    public string Key { get; set; }
+    public string Arg { get; set; }
 }
 
 public class DialogueLine
@@ -47,6 +57,8 @@ public class Choice
     public bool isActive { get; set; }
     public List<ICondition> UnMetConditions { get; set; }
     public List<ICondition> BonusConditions { get; set; }
+    // Named actions fired via DialogueActions when the player picks this choice.
+    public List<DialogueAction> Actions { get; set; }
 }
 
 

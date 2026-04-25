@@ -100,6 +100,7 @@ public class DialogueStarter : MonoBehaviour
         _currentLineIndex = 0;
 
         ApplySetFlags(entry);
+        DialogueActions.InvokeMany(entry?.Actions);
 
         if (entry.Lines == null || entry.Lines.Count == 0)
         {
@@ -159,6 +160,8 @@ public class DialogueStarter : MonoBehaviour
     private void OnChoicePicked(Choice choice)
     {
         if (choice == null || !choice.isActive) return;
+
+        DialogueActions.InvokeMany(choice.Actions);
 
         if (string.IsNullOrEmpty(choice.NextDialogueId))
         {
